@@ -181,10 +181,13 @@ applyTo: '**'
 ## Module File Cleanliness
 
 - Never implement business logic, utility functions, or complex code directly in module (`*.module.ts`) files.
-- Only use module files to import, configure, and wire up providers, controllers, and dependencies.
-- If utility logic or setup code is needed, create a dedicated utility service (e.g., `utils.service.ts`).
-- Register and inject utility services via dependency injection; do not instantiate them directly in module files.
-- Keep module files clean, declarative, and focused solely on module configuration and structure.
+- Module files (`*.module.ts`) must be strictly declarative: only import, configure, and wire up providers, controllers, and dependencies.
+- Never implement business logic, utility functions, configuration logic, or complex code directly in module files or the main application entry file (`main.ts`).
+- If initialization or setup logic is required, encapsulate it in dedicated services (e.g., `utils.service.ts`) and register them as providers using dependency injection; never instantiate them directly in module files.
+- Keep module and entry files concise, readable, and focused solely on structure, configuration, and bootstrapping.
+- The `main.ts` file should only bootstrap the NestJS application and configure global middleware, pipes, filters, and interceptors.
+- Place all business, configuration, and utility logic in dedicated services, providers, or utility modules.
+- Never include instructional comments or implementation details in module or entry files; these files must remain clean, declarative, and maintainable.
 
 ## Variable and Naming Clarity
 
