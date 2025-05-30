@@ -177,3 +177,11 @@ applyTo: '**'
 - Do not use anonymous or inline object types in function signatures or class properties.
 - When extending or composing types, always use interfaces and avoid intersection or union types unless absolutely necessary.
 - All public APIs, including controller responses and service methods, must return objects typed with interfaces, not inline or anonymous types.
+
+## Module File Cleanliness
+
+- Never implement business logic, utility functions, or complex code directly in module (`*.module.ts`) files.
+- Only use module files to import, configure, and wire up providers, controllers, and dependencies.
+- If utility logic or setup code is needed, create a dedicated utility service (e.g., `utils.service.ts`).
+- Register and inject utility services via dependency injection; do not instantiate them directly in module files.
+- Keep module files clean, declarative, and focused solely on module configuration and structure.
