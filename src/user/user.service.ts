@@ -29,13 +29,13 @@ export class UserService implements IUserService {
    * @param email User email
    * @returns IUser or undefined
    */
-  async findByEmail(email: string): Promise<IUser | undefined> {
+  async findByEmail(userEmail: string): Promise<IUser | undefined> {
     try {
-      const user = await this.userModel.findOne({ email }).exec();
+      const user = await this.userModel.findOne({ email: userEmail }).exec();
       return user ? (user.toObject() as IUser) : undefined;
     } catch (error) {
       this.logger.error(
-        `Error finding user by email: ${email}`,
+        `Error finding user by email: ${userEmail}`,
         error && (error as Error).stack,
       );
       return undefined;
@@ -47,12 +47,29 @@ export class UserService implements IUserService {
    * @param dto RegisterDTO
    * @returns IUser
    */
-  async create(dto: RegisterDTO): Promise<IUser> {
+  async create(registerDto: RegisterDTO): Promise<IUser> {
     try {
-      const hashed = await bcrypt.hash(dto.password, 10);
+      const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+      // Check if user is at least 18 years old
+      const dobDate = new Date(registerDto.dob);
+      const today = new Date();
+      const age = today.getFullYear() - dobDate.getFullYear();
+      const monthDiff = today.getMonth() - dobDate.getMonth();
+      const isBirthdayPassed =
+        monthDiff > 0 ||
+        (monthDiff === 0 && today.getDate() >= dobDate.getDate());
+
+      const actualAge = isBirthdayPassed ? age : age - 1;
+      if (actualAge < 18) {
+        throw new Error('User must be at least 18 years old.');
+      }
+
       const createdUser = new this.userModel({
-        email: dto.email,
-        password: hashed,
+        email: registerDto.email,
+        password: hashedPassword,
+        firstName: registerDto.firstName,
+        lastName: registerDto.lastName,
+        dob: registerDto.dob,
       });
       const user = await createdUser.save();
       this.logger.log(`User created: ${user.email}`);
@@ -69,15 +86,21 @@ export class UserService implements IUserService {
    * @param password Plain password
    * @returns IUser or null
    */
-  async validateUser(email: string, password: string): Promise<IUser | null> {
+  async validateUser(
+    userEmail: string,
+    plainPassword: string,
+  ): Promise<IUser | null> {
     try {
-      const user = await this.findByEmail(email);
+      const user = await this.findByEmail(userEmail);
       if (!user) return null;
-      const valid = await bcrypt.compare(password, user.password);
-      return valid ? user : null;
+      const isPasswordValid = await bcrypt.compare(
+        plainPassword,
+        user.password,
+      );
+      return isPasswordValid ? user : null;
     } catch (error) {
       this.logger.error(
-        `Error validating user: ${email}`,
+        `Error validating user: ${userEmail}`,
         error && (error as Error).stack,
       );
       return null;

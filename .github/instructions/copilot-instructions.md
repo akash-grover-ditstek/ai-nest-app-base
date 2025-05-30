@@ -185,3 +185,11 @@ applyTo: '**'
 - If utility logic or setup code is needed, create a dedicated utility service (e.g., `utils.service.ts`).
 - Register and inject utility services via dependency injection; do not instantiate them directly in module files.
 - Keep module files clean, declarative, and focused solely on module configuration and structure.
+
+## Variable and Naming Clarity
+
+- Avoid using short, ambiguous, or generic variable names (e.g., `a`, `b`, `data`, `item`, `obj`, `res`, `req`).
+- Use descriptive, self-explanatory names that clearly convey the purpose and context of variables, functions, classes, and interfaces.
+- Do not use single-letter variable names except for well-known conventions in small scopes (e.g., `i` for loop indices).
+- Always prefer meaningful names that reflect the domain and intent of the code.
+- Review all generated code to ensure naming clarity and avoid generic or placeholder names.

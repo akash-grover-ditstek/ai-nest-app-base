@@ -42,12 +42,14 @@ export class AuthService implements IAuthService {
    * @returns AuthResponseDTO
    */
   async login(loginDto: LoginDTO): Promise<AuthResponseDTO> {
-    const user = await this.userService.validateUser(
+    const authenticatedUser = await this.userService.validateUser(
       loginDto.email,
       loginDto.password,
     );
-    if (!user) throw new UnauthorizedException('Invalid credentials');
-    return this.generateTokens(user.id, user.email);
+    if (!authenticatedUser) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return this.generateTokens(authenticatedUser.id, authenticatedUser.email);
   }
 
   /**
@@ -56,47 +58,56 @@ export class AuthService implements IAuthService {
    * @returns AuthResponseDTO
    */
   async register(registerDto: RegisterDTO): Promise<AuthResponseDTO> {
-    const existing = await this.userService.findByEmail(registerDto.email);
-    if (existing) throw new BadRequestException('Email already registered');
-    const user = await this.userService.create(registerDto);
-    return this.generateTokens(user.id, user.email);
+    const existingUser = await this.userService.findByEmail(registerDto.email);
+    if (existingUser) {
+      throw new BadRequestException('Email already registered');
+    }
+    const createdUser = await this.userService.create(registerDto);
+    return this.generateTokens(createdUser.id, createdUser.email);
   }
 
   /**
    * Sends a password reset email if the user exists.
    * Does not reveal user existence for security.
-   * @param dto ForgotPasswordDTO
+   * @param forgotPasswordDto ForgotPasswordDTO
    * @returns message
    */
-  async forgotPassword(dto: ForgotPasswordDTO): Promise<{ message: string }> {
-    const user = await this.userService.findByEmail(dto.email);
-    if (user) {
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDTO,
+  ): Promise<{ message: string }> {
+    const userToReset = await this.userService.findByEmail(
+      forgotPasswordDto.email,
+    );
+    if (userToReset) {
       const resetToken = this.jwtService.sign(
-        { sub: user.id, email: user.email },
+        { sub: userToReset.id, email: userToReset.email },
         { secret: process.env.JWT_SECRET, expiresIn: '1h' },
       );
       const resetLink = `${process.env.FRONTEND_URL ?? 'http://localhost:3000'}/reset-password?token=${resetToken}`;
       await this.emailService.sendMail(
-        user.email,
+        userToReset.email,
         'Reset your password',
         `Click the link to reset your password: ${resetLink}`,
       );
-      this.logger.log(`Password reset email sent to ${user.email}`);
+      this.logger.log(`Password reset email sent to ${userToReset.email}`);
     }
     return { message: 'If your email exists, a reset link has been sent.' };
   }
 
   /**
    * Refreshes the access token using a valid refresh token.
-   * @param dto RefreshTokenDTO
+   * @param refreshTokenDto RefreshTokenDTO
    * @returns AuthResponseDTO
    */
-  refreshToken(dto: RefreshTokenDTO): AuthResponseDTO {
+  refreshToken(refreshTokenDto: RefreshTokenDTO): AuthResponseDTO {
     try {
-      const payload = this.jwtService.verify<IJwtPayload>(dto.refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET,
-      });
-      return this.generateTokens(payload.sub, payload.email);
+      const jwtPayload = this.jwtService.verify<IJwtPayload>(
+        refreshTokenDto.refreshToken,
+        {
+          secret: process.env.JWT_REFRESH_SECRET,
+        },
+      );
+      return this.generateTokens(jwtPayload.sub, jwtPayload.email);
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -105,16 +116,16 @@ export class AuthService implements IAuthService {
   /**
    * Generates access and refresh tokens for a user.
    * @param userId User ID
-   * @param email User email
+   * @param userEmail User email
    * @returns AuthResponseDTO
    */
-  private generateTokens(userId: string, email: string): AuthResponseDTO {
+  private generateTokens(userId: string, userEmail: string): AuthResponseDTO {
     const accessToken = this.jwtService.sign(
-      { sub: userId, email },
+      { sub: userId, email: userEmail },
       { secret: process.env.JWT_SECRET, expiresIn: '15m' },
     );
     const refreshToken = this.jwtService.sign(
-      { sub: userId, email },
+      { sub: userId, email: userEmail },
       { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
     );
     return { accessToken, refreshToken };
