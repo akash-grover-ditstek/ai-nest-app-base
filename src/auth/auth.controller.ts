@@ -39,9 +39,7 @@ export class AuthController {
   @Post('refresh-token')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, type: AuthResponseDTO })
-  async refreshToken(
-    @Body() refreshTokenDto: RefreshTokenDTO,
-  ): Promise<AuthResponseDTO> {
+  refreshToken(@Body() refreshTokenDto: RefreshTokenDTO): AuthResponseDTO {
     return this.authService.refreshToken(refreshTokenDto);
   }
 }

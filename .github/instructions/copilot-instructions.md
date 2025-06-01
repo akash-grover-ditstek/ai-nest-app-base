@@ -4,6 +4,25 @@ applyTo: '**'
 
 # Copilot Instruction Set for NestJS Applications (Node.js + TypeScript)
 
+## Data Structure & Logic Optimization Rules
+
+- Always prefer structured data transfer using DTOs, interfaces, and types for all input, output, and internal data flows.
+- Use DTOs and interfaces to define and enforce data contracts between layers and modules.
+- Prefer optimized and performant computation logic, especially in hot code paths.
+- Use raw `for` loops for array iteration in performance-critical sections; avoid `forEach`, `map`, `filter`, and `reduce` in hot paths.
+- Cache array length in `for` loops to avoid repeated property access.
+- Use `Array` for indexed access and sequential iteration.
+- Use `Map` for dynamic key-value pairs, especially when keys are not strings.
+- Use `Set` for collections of unique values with fast lookup.
+- Avoid using plain `Object` for dynamic key sets or unordered maps.
+- Avoid unnecessary cloning of objects or arrays inside loops.
+- Minimize memory allocations and avoid creating new functions within loops.
+- Avoid placing `try/catch` blocks inside loops; move error handling outside the loop when possible.
+- Prefer early returns in functions for clarity and to reduce nesting.
+- Inline small functions where function call overhead may impact performance.
+- Avoid large, deeply nested closures in performance-sensitive code.
+- Avoid dynamic property access when the structure is known; use direct property access for better performance and type safety.
+
 ## General Node.js & TypeScript Best Practices
 
 - Use TypeScript strict mode (`"strict": true` in tsconfig).
