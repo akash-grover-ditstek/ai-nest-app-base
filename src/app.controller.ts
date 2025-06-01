@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { AppHealth } from './app-health.interface';
 import { AppService } from './app.service';
 
-@Controller()
+@Controller({ path: '/' })
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

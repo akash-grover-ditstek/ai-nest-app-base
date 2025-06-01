@@ -106,4 +106,43 @@ export class UserService implements IUserService {
       return null;
     }
   }
+
+  /**
+   * Finds a user by ID.
+   * @param userId User ID
+   * @returns IUser or undefined
+   */
+  async findById(userId: string): Promise<IUser | undefined> {
+    try {
+      const user = await this.userModel.findById(userId).exec();
+      return user ? (user.toObject() as IUser) : undefined;
+    } catch (error) {
+      this.logger.error(
+        `Error finding user by ID: ${userId}`,
+        error && (error as Error).stack,
+      );
+      return undefined;
+    }
+  }
+
+  /**
+   * Updates a user's password (hashed).
+   * @param userId User ID
+   * @param newPassword New plain password
+   */
+  async updatePassword(userId: string, newPassword: string): Promise<void> {
+    try {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await this.userModel.findByIdAndUpdate(userId, {
+        password: hashedPassword,
+      });
+      this.logger.log(`Password updated for user ID: ${userId}`);
+    } catch (error) {
+      this.logger.error(
+        `Error updating password for user ID: ${userId}`,
+        error && (error as Error).stack,
+      );
+      throw error;
+    }
+  }
 }

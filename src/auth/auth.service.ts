@@ -8,11 +8,13 @@ import { JwtService } from '@nestjs/jwt';
 import { EmailService } from '../email/email.service';
 import { UserService } from '../user/user.service';
 import { AuthResponseDTO } from './dto/auth-response.dto';
+import { ChangePasswordDTO } from './dto/change-password.dto';
 import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { LoginDTO } from './dto/login.dto';
 import { RefreshTokenDTO } from './dto/refresh-token.dto';
 import { RegisterDTO } from './dto/register.dto';
 import { IAuthService } from './interfaces/auth-service.interface';
+import { ChangePasswordResponse } from './interfaces/change-password-response.interface';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 
 /**
@@ -111,6 +113,35 @@ export class AuthService implements IAuthService {
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  /**
+   * Changes the password for a logged-in user.
+   * @param userId User ID
+   * @param dto ChangePasswordDTO
+   * @returns ChangePasswordResponse
+   */
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDTO,
+  ): Promise<ChangePasswordResponse> {
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    const isCurrentPasswordValid = await this.userService.validateUser(
+      user.email,
+      dto.currentPassword,
+    );
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+    if (dto.currentPassword === dto.newPassword) {
+      throw new BadRequestException('New password must be different');
+    }
+    await this.userService.updatePassword(user.id, dto.newPassword);
+    this.logger.log(`Password changed for user: ${user.email}`);
+    return { message: 'Password changed successfully' };
   }
 
   /**
