@@ -28,6 +28,22 @@ export class User extends Document {
   @Prop({ required: true })
   dob!: string;
 
+  @Prop({
+    type: [String],
+    default: [],
+    index: true,
+    ref: 'Role', // Reference to Role collection
+    required: false,
+  })
+  roles!: string[]; // Array of Role document ObjectIds as strings
+
+  @Prop({
+    type: [String],
+    default: [],
+    index: true,
+  })
+  permissions!: string[];
+
   // For future extensibility: e.g., soft delete
   // @Prop({ default: false, index: true })
   // isDeleted?: boolean;
@@ -37,10 +53,7 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 // Add virtual id property to treat _id and id as the same
 UserSchema.virtual('id').get(function (this: { _id: Types.ObjectId | string }) {
-  if (this._id instanceof Types.ObjectId) {
-    return this._id.toHexString();
-  }
-  return typeof this._id === 'string' ? this._id : undefined;
+  return this._id.toString();
 });
 
 UserSchema.set('toJSON', { virtuals: true, versionKey: false });

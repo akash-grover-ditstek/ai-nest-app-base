@@ -51,7 +51,12 @@ export class AuthService implements IAuthService {
     if (!authenticatedUser) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.generateTokens(authenticatedUser.id, authenticatedUser.email);
+    return this.generateTokens(
+      authenticatedUser.id,
+      authenticatedUser.email,
+      authenticatedUser.roles,
+      authenticatedUser.permissions,
+    );
   }
 
   /**
@@ -65,7 +70,12 @@ export class AuthService implements IAuthService {
       throw new BadRequestException('Email already registered');
     }
     const createdUser = await this.userService.create(registerDto);
-    return this.generateTokens(createdUser.id, createdUser.email);
+    return this.generateTokens(
+      createdUser.id,
+      createdUser.email,
+      createdUser.roles,
+      createdUser.permissions,
+    );
   }
 
   /**
@@ -109,7 +119,12 @@ export class AuthService implements IAuthService {
           secret: process.env.JWT_REFRESH_SECRET,
         },
       );
-      return this.generateTokens(jwtPayload.sub, jwtPayload.email);
+      return this.generateTokens(
+        jwtPayload.sub,
+        jwtPayload.email,
+        jwtPayload.roles,
+        jwtPayload.permissions,
+      );
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -148,15 +163,22 @@ export class AuthService implements IAuthService {
    * Generates access and refresh tokens for a user.
    * @param userId User ID
    * @param userEmail User email
+   * @param roles User roles
+   * @param permissions User permissions
    * @returns AuthResponseDTO
    */
-  private generateTokens(userId: string, userEmail: string): AuthResponseDTO {
+  private generateTokens(
+    userId: string,
+    userEmail: string,
+    roles: string[],
+    permissions: string[],
+  ): AuthResponseDTO {
     const accessToken = this.jwtService.sign(
-      { sub: userId, email: userEmail },
+      { sub: userId, email: userEmail, roles, permissions },
       { secret: process.env.JWT_SECRET, expiresIn: '15m' },
     );
     const refreshToken = this.jwtService.sign(
-      { sub: userId, email: userEmail },
+      { sub: userId, email: userEmail, roles, permissions },
       { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
     );
     return { accessToken, refreshToken };

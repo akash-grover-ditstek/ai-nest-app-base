@@ -6,4 +6,10 @@ export class UserDTO {
 
   @ApiProperty()
   email!: string;
+
+  @ApiProperty({ type: [String] })
+  roles!: string[];
+
+  @ApiProperty({ type: [String] })
+  permissions!: string[];
 }

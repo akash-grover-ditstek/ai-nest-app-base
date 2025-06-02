@@ -116,7 +116,10 @@ applyTo: '**'
 - Implement interfaces in services and repositories for testability and flexibility.
 - Prefer interface-based dependency injection.
 
-## Modular Approach
+## Single Entity per File Rule
+
+- Each service, interface, and DTO must be defined in its own file; do not define multiple services, interfaces, or DTOs in a single file.
+- Name each file according to the entity name, using the appropriate suffix and `kebab-case` (e.g., `user.service.ts`, `user.interface.ts`, `create-user.dto.ts`).
 
 - Organize code into feature-based modules.
 - Each module should encapsulate its controllers, services, DTOs, entities, and providers.

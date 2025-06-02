@@ -70,6 +70,8 @@ export class UserService implements IUserService {
         firstName: registerDto.firstName,
         lastName: registerDto.lastName,
         dob: registerDto.dob,
+        roles: ['user'], // Default role
+        permissions: [], // Default permissions
       });
       const user = await createdUser.save();
       this.logger.log(`User created: ${user.email}`);
@@ -144,5 +146,67 @@ export class UserService implements IUserService {
       );
       throw error;
     }
+  }
+
+  /**
+   * Assigns a role to a user.
+   * @param userId User ID
+   * @param roleName Role name
+   * @returns Updated IUser
+   */
+  async assignRole(userId: string, roleName: string): Promise<IUser> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new Error('User not found');
+    if (!user.roles.includes(roleName)) {
+      user.roles.push(roleName);
+      await user.save();
+    }
+    return user.toObject() as IUser;
+  }
+
+  /**
+   * Removes a role from a user.
+   * @param userId User ID
+   * @param roleName Role name
+   * @returns Updated IUser
+   */
+  async removeRole(userId: string, roleName: string): Promise<IUser> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new Error('User not found');
+    user.roles = user.roles.filter((role: string) => role !== roleName);
+    await user.save();
+    return user.toObject() as IUser;
+  }
+
+  /**
+   * Assigns a permission to a user.
+   * @param userId User ID
+   * @param permission Permission name
+   * @returns Updated IUser
+   */
+  async assignPermission(userId: string, permission: string): Promise<IUser> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new Error('User not found');
+    if (!user.permissions.includes(permission)) {
+      user.permissions.push(permission);
+      await user.save();
+    }
+    return user.toObject() as IUser;
+  }
+
+  /**
+   * Removes a permission from a user.
+   * @param userId User ID
+   * @param permission Permission name
+   * @returns Updated IUser
+   */
+  async removePermission(userId: string, permission: string): Promise<IUser> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new Error('User not found');
+    user.permissions = user.permissions.filter(
+      (perm: string) => perm !== permission,
+    );
+    await user.save();
+    return user.toObject() as IUser;
   }
 }

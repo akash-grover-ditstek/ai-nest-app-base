@@ -5,4 +5,6 @@ export interface IUser {
   firstName: string;
   lastName: string;
   dob: string;
+  roles: string[]; // Use string literal union if roles are fixed
+  permissions: string[];
 }

@@ -75,7 +75,6 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDTO,
     @Req() req: AuthenticatedRequest,
   ): Promise<ChangePasswordResponse> {
-    console.log('Change password request:', changePasswordDto);
     if (!req.user) {
       throw new UnauthorizedException('User not authenticated');
     }
