@@ -5,6 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { RequestWithUserPermissions } from './interfaces/request-with-user-permissions.interface';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -16,7 +17,10 @@ export class PermissionsGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
     if (!requiredPermissions || requiredPermissions.length === 0) return true;
-    const { user } = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<RequestWithUserPermissions>();
+    const { user } = request;
     if (!user || !user.permissions) return false;
     const hasPermission = user.permissions.some((perm: string) =>
       requiredPermissions.includes(perm),
