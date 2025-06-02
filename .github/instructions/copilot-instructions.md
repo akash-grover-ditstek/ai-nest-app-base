@@ -22,6 +22,14 @@ applyTo: '**'
 - Inline small functions where function call overhead may impact performance.
 - Avoid large, deeply nested closures in performance-sensitive code.
 - Avoid dynamic property access when the structure is known; use direct property access for better performance and type safety.
+- Always analyze and minimize both time and space complexity when designing algorithms and data flows.
+- Prefer algorithms and data structures that provide optimal performance for the expected input size and usage patterns.
+- Avoid unnecessary nested loops and redundant computations; refactor logic to reduce algorithmic complexity where possible.
+- Use memoization, caching, or precomputation to optimize repeated expensive operations.
+- Profile and benchmark critical code paths to identify and address performance bottlenecks.
+- Choose the most efficient data structure for the task (e.g., prefer `Map` or `Set` for fast lookups, avoid linear searches in large arrays).
+- Avoid holding large objects or arrays in memory longer than necessary; release resources promptly.
+- Document the expected time and space complexity of non-trivial functions and algorithms.
 
 ## General Node.js & TypeScript Best Practices
 
@@ -215,3 +223,29 @@ applyTo: '**'
 - Do not use single-letter variable names except for well-known conventions in small scopes (e.g., `i` for loop indices).
 - Always prefer meaningful names that reflect the domain and intent of the code.
 - Review all generated code to ensure naming clarity and avoid generic or placeholder names.
+
+## MongoDB Database Rules & Optimization (NestJS + Mongoose)
+
+- Use Mongoose as the ODM for MongoDB integration in NestJS.
+- Define all schemas using Mongoose `Schema` and TypeScript interfaces for strong typing.
+- Always use DTOs and interfaces for all data flows between controllers, services, and repositories.
+- Use `@Prop({ index: true })` or schema-level indexes for fields frequently used in queries, filters, or sorting to optimize query performance.
+- Design collections with optimal indexes; analyze query patterns and add compound indexes where appropriate.
+- Avoid unnecessary indexes to reduce write overhead and storage usage.
+- Use MongoDB's aggregation framework for complex data transformations, reporting, and analytics; prefer pipelines that minimize data scanned and leverage indexes.
+- Use MongoDB views for simplified, read-only representations of data when appropriate, but ensure views do not introduce performance bottlenecks.
+- Always use the most efficient query operators (`$in`, `$exists`, `$gte`, `$lte`, etc.) and avoid full collection scans.
+- Prefer projections to limit returned fields and reduce network payload.
+- Use lean queries (`.lean()`) in Mongoose for read-only operations to improve performance by returning plain JavaScript objects instead of Mongoose documents.
+- Use pagination (`limit`, `skip`, or cursor-based) for large result sets to avoid memory issues.
+- Always use the string alias `id` for MongoDB's `_id` field in DTOs and interfaces for portability and clarity; map `_id` to `id` as a string in all responses.
+- Avoid storing large blobs or files in MongoDB; use external storage and reference by URL or ID.
+- Normalize or denormalize data based on access patterns; prefer embedding for tightly coupled data and referencing for loosely coupled or large collections.
+- Use transactions for multi-document updates to ensure data consistency.
+- Regularly review and optimize schema design, indexes, and query patterns using MongoDB Atlas or `explain()` for performance analysis.
+- Use environment variables for all MongoDB connection strings and credentials; never hardcode secrets.
+- Handle all database errors gracefully and log them using the centralized logger service.
+- Use dependency injection for all database services and repositories.
+- Write unit and integration tests for all database operations.
+- Document all data models, indexes, and aggregation pipelines for maintainability.
+- Follow official NestJS and Mongoose best practices for schema design, connection management, and performance optimization.
