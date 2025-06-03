@@ -4,47 +4,28 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Reflector } from '@nestjs/core';
 import { RequestWithUserPermissions } from './interfaces/request-with-user-permissions.interface';
-import { IRoutePermissionService } from './interfaces/route-permission-service.interface';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
-  constructor(
-    private readonly routePermissionService: IRoutePermissionService,
-  ) {}
+  constructor(private readonly reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
+      'permissions',
+      [context.getHandler(), context.getClass()],
+    );
+    if (!requiredPermissions || requiredPermissions.length === 0) return true;
     const request = context
       .switchToHttp()
-      .getRequest<Request & RequestWithUserPermissions>();
-    const user = request.user;
-    const routePath = request.path;
-    const httpMethod = request.method;
-    const routePermission =
-      await this.routePermissionService.getRoutePermission(
-        routePath,
-        httpMethod,
-      );
-    if (
-      !routePermission ||
-      !routePermission.requiredPermissions ||
-      routePermission.requiredPermissions.length === 0
-    ) {
-      return true;
-    }
-    if (!user || !user.permissions) {
-      return false;
-    }
-    for (
-      let i = 0, len = routePermission.requiredPermissions.length;
-      i < len;
-      ++i
-    ) {
-      if (user.permissions.includes(routePermission.requiredPermissions[i])) {
-        return true;
-      }
-    }
-    throw new ForbiddenException('Insufficient permission');
+      .getRequest<RequestWithUserPermissions>();
+    const { user } = request;
+    if (!user || !user.permissions) return false;
+    const hasPermission = user.permissions.some((perm: string) =>
+      requiredPermissions.includes(perm),
+    );
+    if (!hasPermission) throw new ForbiddenException('Insufficient permission');
+    return true;
   }
 }
