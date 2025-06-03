@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './common/redis/redis.module';
 import { getEnvFilePath } from './common/utils/env-loader';
 import { DatabaseModule } from './database/database.module';
 import { PermissionsGuard } from './permissions/permissions.guard';
@@ -25,6 +26,7 @@ const envFilePath: string = getEnvFilePath();
     UserModule,
     RolesModule,
     PermissionsModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [

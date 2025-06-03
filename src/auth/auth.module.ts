@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { RedisModule } from '../common/redis/redis.module';
 import { EmailModule } from '../email/email.module';
 import { PermissionsGuard } from '../permissions/permissions.guard';
 import { RolesGuard } from '../roles/roles.guard';
@@ -15,6 +16,7 @@ import { JwtStrategy } from './jwt.strategy';
     JwtModule.register({}), // Configured in service
     UserModule,
     EmailModule,
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RolesGuard, PermissionsGuard],
