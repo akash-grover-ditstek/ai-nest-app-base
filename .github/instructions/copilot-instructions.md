@@ -120,7 +120,7 @@ applyTo: '**'
 
 - Each service, interface, and DTO must be defined in its own file; do not define multiple services, interfaces, or DTOs in a single file.
 - Name each file according to the entity name, using the appropriate suffix and `kebab-case` (e.g., `user.service.ts`, `user.interface.ts`, `create-user.dto.ts`).
-
+- Never define multiple services, modules, controllers, DTOs, or interfaces in a single file. Each service, module, controller, DTO, and interface must be placed in its own dedicated file within a feature-specific folder. Organize each feature or domain into its own folder, and place related files (services, controllers, DTOs, interfaces, etc.) inside that folder. Do not group unrelated entities in the same file or folder.
 - Organize code into feature-based modules.
 - Each module should encapsulate its controllers, services, DTOs, entities, and providers.
 - Avoid circular dependencies between modules.
